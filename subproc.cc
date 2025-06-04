@@ -43,10 +43,10 @@
 #include <sys/wait.h>
 #include <time.h>
 #include <unistd.h>
-
 #include <string>
 #include <vector>
 
+#include "log2file.h"
 #include "cgroup.h"
 #include "cgroup2.h"
 #include "contain.h"
@@ -405,12 +405,14 @@ static int reapProc(nsjconf_t* nsjconf, pid_t pid, bool should_wait = false) {
 			time_alive = now_in_ms - p->second.start_accu;
 		}
 		LOG_STAT("%d:time = %" PRId64, pid, time_alive);
+		log2file::writeStatToFile(nsjconf, "time", time_alive);
 
 		if (WIFEXITED(status)) {
 			LOG_I("pid=%d (%s) exited with status: %d, (PIDs left: %d)", pid,
 			    remote_txt.c_str(), WEXITSTATUS(status), countProc(nsjconf) - 1);
 			LOG_STAT("%d:exit_normally = true", pid);
 			LOG_STAT("%d:exit_code = %d", pid, WEXITSTATUS(status));
+			log2file::writeStatToFile(nsjconf, "exit_code", WEXITSTATUS(status));
 			removeProc(nsjconf, pid);
 			return WEXITSTATUS(status);
 		}
@@ -420,6 +422,7 @@ static int reapProc(nsjconf_t* nsjconf, pid_t pid, bool should_wait = false) {
 			    WTERMSIG(status), countProc(nsjconf) - 1);
 			LOG_STAT("%d:exit_normally = false", pid);
 			LOG_STAT("%d:exit_code = %d", pid, WTERMSIG(status));
+			log2file::writeStatToFile(nsjconf, "exit_code", 128 + WTERMSIG(status));
 			removeProc(nsjconf, pid);
 			return 128 + WTERMSIG(status);
 		}
@@ -624,6 +627,7 @@ pid_t runChild(nsjconf_t* nsjconf, int netfd, int fd_in, int fd_out, int fd_err)
 		tstart = (int)p->second.start;
 	}
 	LOG_STAT("%d:process_spawned = %d", pid, tstart);
+	log2file::writeStatToFile(nsjconf, "pid", pid);
 
 	char rcvChar;
 	if (util::readFromFd(parent_fd, &rcvChar, sizeof(rcvChar)) == sizeof(rcvChar) &&

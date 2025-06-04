@@ -20,7 +20,7 @@
 */
 
 #include "cgroup2.h"
-
+#include "log2file.h"
 #include <errno.h>
 #include <fcntl.h>
 #include <limits.h>
@@ -387,15 +387,9 @@ void printStat(nsjconf_t *nsjconf, pid_t pid) {
 		return;
 	}
 
-	std::ofstream ofs(nsjconf->stats_file, std::ios::app);
-	if (!ofs) {
-		LOG_W("Cannot open stats file: %s", nsjconf->stats_file.c_str());
-		return;
-	}
-	ofs << "pid=" << pid << " ";
-	ofs << "cgroup_memory_max_usage=" << max_usage << " ";
-	ofs << "cgroup_memory_failcnt=" << failcnt << std::endl;
-	ofs.close();
+	log2file::writeStatToFile(nsjconf,  "cgroup_memory_max_usage", max_usage);
+	log2file::writeStatToFile(nsjconf, "cgroup_memory_failcnt", failcnt);
+	
 }
 
 }  // namespace cgroup2

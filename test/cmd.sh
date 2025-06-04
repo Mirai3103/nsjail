@@ -2,7 +2,7 @@ sudo ../nsjail \
   -Mo \
   --chroot /tmp/my_sandbox \
   --bindmount_ro=$(pwd):/app \
-  --rlimit_as 256 \
+  --rlimit_as 60 \
   --cgroup_mem_max 134217728 \
   --rlimit_nproc 3 \
   --cgroup_pids_max 3 \
