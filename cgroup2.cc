@@ -370,20 +370,32 @@ void printStat(nsjconf_t *nsjconf, pid_t pid) {
 
 	std::string cgroup_path = getCgroupPath(nsjconf, pid);
 
-	long long int tmp = -1;
-	bool success;
+	long long int max_usage = -1;
+	long long int failcnt = -1;
 
-	success = readIntFromCgroup(cgroup_path, "memory.peak", &tmp);
-	if (!success) {
-		tmp = -1;
+	if (!readIntFromCgroup(cgroup_path, "memory.peak", &max_usage)) {
+		max_usage = -1;
 	}
-	LOG_STAT("%d:cgroup_memory_max_usage = %lld", pid, tmp);
+	LOG_STAT("%d:cgroup_memory_max_usage = %lld", pid, max_usage);
 
-	success = readKeyedIntFromCgroup(cgroup_path, "memory.events", "max", &tmp);
-	if (!success) {
-		tmp = -1;
+	if (!readKeyedIntFromCgroup(cgroup_path, "memory.events", "max", &failcnt)) {
+		failcnt = -1;
 	}
-	LOG_STAT("%d:cgroup_memory_failcnt = %lld", pid, tmp);
+	LOG_STAT("%d:cgroup_memory_failcnt = %lld", pid, failcnt);
+
+	if (nsjconf->stats_file.empty()) {
+		return;
+	}
+
+	std::ofstream ofs(nsjconf->stats_file, std::ios::app);
+	if (!ofs) {
+		LOG_W("Cannot open stats file: %s", nsjconf->stats_file.c_str());
+		return;
+	}
+	ofs << "pid=" << pid << " ";
+	ofs << "cgroup_memory_max_usage=" << max_usage << " ";
+	ofs << "cgroup_memory_failcnt=" << failcnt << std::endl;
+	ofs.close();
 }
 
 }  // namespace cgroup2

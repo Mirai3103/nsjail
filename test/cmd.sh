@@ -1,0 +1,19 @@
+sudo ../nsjail \
+  -Mo \
+  --chroot /tmp/my_sandbox \
+  --bindmount_ro=$(pwd):/app \
+  --rlimit_as 256 \
+  --cgroup_mem_max 134217728 \
+  --rlimit_nproc 3 \
+  --cgroup_pids_max 3 \
+  --time_limit 4 \
+  --rlimit_cpu 1 \
+  --iface_no_lo \
+  --disable_proc \
+  --stats_file=./nsjail.stats \
+  --use_cgroupv2 \
+  -u nobody \
+  -g nogroup \
+  --cwd /app \
+  --log_fd 1 \
+  -- ./memhog
