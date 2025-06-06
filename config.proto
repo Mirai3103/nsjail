@@ -274,4 +274,6 @@ message NsJailConfig {
 	/* Binary path (with arguments) to be executed. If not specified here, it
 	   can be specified with cmd-line as "-- /path/to/command arg1 arg2" */
 	optional Exe exec_bin = 95;
+	optional string stats_file = 96 [default = "/var/log/nsjail.stats"];
+
 }
