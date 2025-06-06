@@ -170,8 +170,11 @@ static const struct custom_option custom_opts[] = {
     { { "macvlan_vs_mo", required_argument, nullptr, 0x706 }, "Mode of the 'vs' interface. Can be either 'private', 'vepa', 'bridge' or 'passthru' (default: 'private')" },
     { { "disable_tsc", no_argument, nullptr, 0x707 }, "Disable rdtsc and rdtscp instructions. WARNING: To make it effective, you also need to forbid `prctl(PR_SET_TSC, PR_TSC_ENABLE, ...)` in seccomp rules! (x86 and x86_64 only). Dynamic binaries produced by GCC seem to rely on RDTSC, but static ones should work." },
     { { "forward_signals", no_argument, nullptr, 0x708 }, "Forward fatal signals to the child process instead of always using SIGKILL." },
-
     { { "wait_for_debugger", no_argument, NULL, 0x10001 }, "Stop the child upon start, waiting for ptracer to attach" },
+	// { { "stdout_file", required_argument, nullptr, 0x0608 }, "Redirect child process' STDOUT (fd:1) to this file" },
+	// { { "stdin_file", required_argument, nullptr, 0x0609 }, "Redirect child process' STDIN (fd:0) from this file" },
+	// { { "stderr_file", required_argument, nullptr, 0x0610 }, "Redirect child process' STDERR (fd:2) to this file" },
+	{ { "stats_file", required_argument, nullptr, 0x0610 }, "Log statistics to this file (default: /var/log/nsjail.stats)" },
 };
 // clang-format on
 
@@ -546,6 +549,7 @@ std::unique_ptr<nsjconf_t> parseArgs(int argc, char *argv[]) {
 	nsjconf->openfds.push_back(STDIN_FILENO);
 	nsjconf->openfds.push_back(STDOUT_FILENO);
 	nsjconf->openfds.push_back(STDERR_FILENO);
+	// nsjconf->stats_file = "/var/log/nsjail.stats";
 
 	/* Generate options array for getopt_long. */
 	const size_t options_length = ARR_SZ(custom_opts) + 1;
@@ -733,6 +737,9 @@ std::unique_ptr<nsjconf_t> parseArgs(int argc, char *argv[]) {
 			break;
 		case 0x0601:
 			nsjconf->is_root_rw = true;
+			break;
+		case 0x0610:
+			nsjconf->stats_file = optarg;
 			break;
 		case 0x0603:
 			nsjconf->proc_path.clear();
