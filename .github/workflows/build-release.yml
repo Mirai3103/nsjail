@@ -1,0 +1,33 @@
+name: Build nsjail Release
+
+on:
+  push:
+    tags:
+      - "v*"  # Trigger when you push a tag like v1.0.0
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            autoconf bison flex gcc g++ \
+            git libprotobuf-dev libnl-route-3-dev \
+            libtool make pkg-config protobuf-compiler
+
+      - name: Build nsjail
+        run: |
+          make clean
+          make -j$(nproc)
+
+      - name: Upload release binary
+        uses: softprops/action-gh-release@v1
+        with:
+          files: nsjail
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
