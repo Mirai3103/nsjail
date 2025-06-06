@@ -33,7 +33,7 @@ COMMON_FLAGS += -O2 -c \
 
 CXXFLAGS += $(USER_DEFINES) $(COMMON_FLAGS) $(shell pkg-config --cflags protobuf) \
 	-std=c++20 -fno-exceptions -Wno-unused -Wno-unused-parameter
-LDFLAGS += -pie -Wl,-z,noexecstack -lpthread $(shell pkg-config --libs protobuf)
+LDFLAGS += -pie -Wl,-z,noexecstack -lpthread /usr/lib/x86_64-linux-gnu/libprotobuf.a -lz
 
 BIN = nsjail
 LIBS = kafel/libkafel.a
@@ -68,7 +68,8 @@ ifneq ($(NL3_EXISTS), yes)
 	$(warning "You probably miss libnl3(-dev)/libnl-route-3(-dev) libraries")
 	$(warning "============================================================")
 endif
-	$(CXX) -o $(BIN) $(OBJS) $(LIBS) $(LDFLAGS)
+	$(CXX) -o $(BIN) $(OBJS) $(LIBS) $(LDFLAGS) -static-libstdc++ -static-libgcc
+
 
 .PHONY: kafel_init
 kafel_init:
